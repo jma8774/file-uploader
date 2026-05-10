@@ -1,5 +1,21 @@
 <script setup lang="ts">
+import { ref } from 'vue'
 import FileUploader from '../components/FileUploader.vue'
+import UploadResult from '../components/UploadResult.vue'
+import type { UploadResponse } from '../api'
+
+const uploadResponse = ref<UploadResponse | null>(null)
+const uploaderKey = ref(0)
+
+function onUploaded(response: UploadResponse) {
+  uploadResponse.value = response
+}
+
+function onUploadAnother() {
+  uploadResponse.value = null
+  // Force the FileUploader to fully remount so its internal state resets.
+  uploaderKey.value += 1
+}
 </script>
 
 <template>
@@ -10,9 +26,18 @@ import FileUploader from '../components/FileUploader.vue'
       <p>Files expire after 24 hours.</p>
     </header>
 
-    <FileUploader />
+    <FileUploader
+      v-if="!uploadResponse"
+      :key="uploaderKey"
+      @uploaded="onUploaded"
+    />
 
-    <!-- TODO: UploadResult (TICKET-007) -->
+    <UploadResult
+      v-else
+      :response="uploadResponse"
+      @upload-another="onUploadAnother"
+    />
+
     <!-- TODO: StatsPanel (TICKET-008) -->
   </section>
 </template>
