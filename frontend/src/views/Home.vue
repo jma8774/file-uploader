@@ -1,19 +1,21 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, useTemplateRef } from 'vue'
 import FileUploader from '../components/FileUploader.vue'
 import UploadResult from '../components/UploadResult.vue'
+import StatsPanel from '../components/StatsPanel.vue'
 import type { UploadResponse } from '../api'
 
 const uploadResponse = ref<UploadResponse | null>(null)
 const uploaderKey = ref(0)
+const statsPanel = useTemplateRef<{ refresh: () => Promise<void> }>('statsPanel')
 
 function onUploaded(response: UploadResponse) {
   uploadResponse.value = response
+  statsPanel.value?.refresh()
 }
 
 function onUploadAnother() {
   uploadResponse.value = null
-  // Force the FileUploader to fully remount so its internal state resets.
   uploaderKey.value += 1
 }
 </script>
@@ -38,7 +40,7 @@ function onUploadAnother() {
       @upload-another="onUploadAnother"
     />
 
-    <!-- TODO: StatsPanel (TICKET-008) -->
+    <StatsPanel ref="statsPanel" />
   </section>
 </template>
 
