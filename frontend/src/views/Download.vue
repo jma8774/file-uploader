@@ -106,24 +106,21 @@ onMounted(load)
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 16px;
+  gap: var(--space-3);
 }
 
 .loading {
-  margin: 0;
-  color: #555;
+  color: var(--color-muted);
 }
 
 .safety-banner {
   width: 100%;
-  margin: 0;
-  padding: 12px 16px;
-  border-radius: 8px;
-  background: #fffaf0;
-  border: 1px solid #f6ad55;
-  color: #7b341e;
+  padding: var(--space-3) 16px;
+  border-radius: var(--radius);
+  background: var(--color-warning-bg);
+  border: 1px solid var(--color-warning-border);
+  color: var(--color-warning-text);
   text-align: center;
-  box-sizing: border-box;
 }
 
 .card {
@@ -131,20 +128,16 @@ onMounted(load)
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
-  padding: 24px;
-  border: 1px solid #cbd5e0;
-  border-radius: 8px;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-surface);
   text-align: center;
-  box-sizing: border-box;
 }
 
 .card h1 {
-  margin: 0 0 8px;
-}
-
-.card p {
-  margin: 0;
+  margin-block-end: var(--space-2);
 }
 
 .filename {
@@ -154,21 +147,27 @@ onMounted(load)
 
 .size,
 .expires {
-  color: #555;
+  color: var(--color-muted);
 }
 
 .download-btn {
-  margin-top: 12px;
-  padding: 10px 20px;
-  font: inherit;
-  border: 1px solid #1f2937;
-  border-radius: 6px;
-  background: #1f2937;
-  color: #fff;
+  margin-top: var(--space-3);
+  min-height: var(--tap-target);
+  padding: 10px 22px;
+  border: 1px solid var(--color-accent);
+  border-radius: var(--radius-sm);
+  background: var(--color-accent);
+  color: var(--color-accent-contrast);
   text-decoration: none;
   display: inline-flex;
   align-items: center;
   cursor: pointer;
+  transition: background-color 120ms ease, border-color 120ms ease;
+}
+
+.download-btn:hover {
+  background: #2d3748;
+  border-color: #2d3748;
 }
 
 .download-btn:disabled {

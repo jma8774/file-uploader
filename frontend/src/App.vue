@@ -11,6 +11,12 @@
 .app {
   max-width: 640px;
   margin: 0 auto;
-  padding: 32px 20px;
+  padding: var(--space-4) 20px;
+}
+
+@media (max-width: 480px) {
+  .app {
+    padding: 20px 16px;
+  }
 }
 </style>

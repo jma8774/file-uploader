@@ -59,45 +59,51 @@ defineProps<{
 .stats {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  padding-top: 12px;
-  border-top: 1px solid #e2e8f0;
-}
-
-.title {
-  margin: 0;
-  font-size: 1.125rem;
+  gap: var(--space-3);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--color-border);
 }
 
 .loading,
 .unavailable {
-  margin: 0;
-  color: #555;
+  color: var(--color-muted);
 }
 
 .safety-banner {
-  margin: 0;
-  padding: 12px 16px;
-  border-radius: 8px;
-  background: #fffaf0;
-  border: 1px solid #f6ad55;
-  color: #7b341e;
+  padding: var(--space-3) 16px;
+  border-radius: var(--radius);
+  background: var(--color-warning-bg);
+  border: 1px solid var(--color-warning-border);
+  color: var(--color-warning-text);
 }
 
 .grid {
   display: grid;
   grid-template-columns: max-content 1fr;
-  gap: 4px 16px;
+  gap: var(--space-1) 16px;
   margin: 0;
 }
 
 .grid dt {
-  color: #555;
+  color: var(--color-muted);
 }
 
 .grid dd {
   margin: 0;
   text-align: right;
   font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 380px) {
+  .grid {
+    grid-template-columns: 1fr;
+    gap: 0 0;
+  }
+  .grid dt {
+    padding-top: var(--space-2);
+  }
+  .grid dd {
+    text-align: left;
+  }
 }
 </style>

@@ -58,47 +58,57 @@ async function copyLink() {
 .result {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  padding: 12px 16px;
-  border: 1px solid #cbd5e0;
-  border-radius: 8px;
-  background: #f7fafc;
+  gap: var(--space-2);
+  padding: 16px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-surface);
 }
 
 .label {
-  margin: 0;
   font-weight: 600;
 }
 
 .link {
   word-break: break-all;
-  color: #1a365d;
+  color: var(--color-accent-strong);
 }
 
 .actions {
   display: flex;
-  gap: 8px;
+  gap: var(--space-2);
   flex-wrap: wrap;
 }
 
 .primary-btn,
 .open-btn,
 .reset-btn {
-  padding: 8px 16px;
-  font: inherit;
-  border-radius: 6px;
-  border: 1px solid #ccc;
-  background: #fff;
+  min-height: var(--tap-target);
+  padding: 10px 18px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text);
   cursor: pointer;
   text-decoration: none;
-  color: inherit;
   display: inline-flex;
   align-items: center;
+  transition: background-color 120ms ease, border-color 120ms ease;
+}
+
+.open-btn:hover,
+.reset-btn:hover {
+  border-color: var(--color-muted);
 }
 
 .primary-btn {
-  background: #1f2937;
-  color: #fff;
-  border-color: #1f2937;
+  background: var(--color-accent);
+  color: var(--color-accent-contrast);
+  border-color: var(--color-accent);
+}
+
+.primary-btn:hover {
+  background: #2d3748;
+  border-color: #2d3748;
 }
 </style>

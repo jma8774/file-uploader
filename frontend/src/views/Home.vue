@@ -66,18 +66,17 @@ onMounted(loadStats)
 .home {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: var(--space-4);
 }
 
 .home-header {
   text-align: center;
-}
-
-.home-header h1 {
-  margin: 0 0 8px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
 }
 
 .home-header p {
-  margin: 0;
+  color: var(--color-muted);
 }
 </style>
