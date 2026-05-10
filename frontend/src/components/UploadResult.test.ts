@@ -1,0 +1,35 @@
+import { mount } from '@vue/test-utils'
+import { describe, expect, it } from 'vitest'
+import UploadResult from './UploadResult.vue'
+import type { UploadResponse } from '../api'
+
+const RESPONSE: UploadResponse = {
+  token: 'abc123',
+  downloadPageUrl: '/file/abc123',
+  directDownloadUrl: '/d/abc123',
+  originalName: 'example.zip',
+  sizeBytes: 1024,
+  expiresAt: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
+  maxDownloads: 200,
+}
+
+describe('UploadResult', () => {
+  it('renders the absolute URL using window.location.origin', () => {
+    const wrapper = mount(UploadResult, { props: { response: RESPONSE } })
+    const expectedUrl = `${window.location.origin}/file/abc123`
+    expect(wrapper.text()).toContain(expectedUrl)
+  })
+
+  it('renders Copy Link, Open Link, and Upload another buttons', () => {
+    const wrapper = mount(UploadResult, { props: { response: RESPONSE } })
+    expect(wrapper.text()).toContain('Copy Link')
+    expect(wrapper.text()).toContain('Open Link')
+    expect(wrapper.text()).toContain('Upload another')
+  })
+
+  it('emits "upload-another" when the reset button is clicked', async () => {
+    const wrapper = mount(UploadResult, { props: { response: RESPONSE } })
+    await wrapper.find('.reset-btn').trigger('click')
+    expect(wrapper.emitted('upload-another')).toHaveLength(1)
+  })
+})
