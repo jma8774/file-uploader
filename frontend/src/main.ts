@@ -1,7 +1,6 @@
 import { createApp } from 'vue'
 import './style.css'
 import App from './App.vue'
+import { router } from './router'
 
-// TODO: routes — Vue Router wiring lands in TICKET-002.
-
-createApp(App).mount('#app')
+createApp(App).use(router).mount('#app')
