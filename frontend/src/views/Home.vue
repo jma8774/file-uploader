@@ -1,23 +1,40 @@
 <script setup lang="ts">
-import { ref, useTemplateRef } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import FileUploader from '../components/FileUploader.vue'
 import UploadResult from '../components/UploadResult.vue'
 import StatsPanel from '../components/StatsPanel.vue'
-import type { UploadResponse } from '../api'
+import { getStats, type StatsResponse, type UploadResponse } from '../api'
 
 const uploadResponse = ref<UploadResponse | null>(null)
 const uploaderKey = ref(0)
-const statsPanel = useTemplateRef<{ refresh: () => Promise<void> }>('statsPanel')
+
+const statsState = ref<'loading' | 'ready' | 'error'>('loading')
+const stats = ref<StatsResponse | null>(null)
+
+// Treat a missing flag as enabled — only an explicit `false` should lock UI.
+const uploadsDisabled = computed(() => stats.value?.uploadsEnabled === false)
+
+async function loadStats() {
+  statsState.value = 'loading'
+  try {
+    stats.value = await getStats()
+    statsState.value = 'ready'
+  } catch {
+    statsState.value = 'error'
+  }
+}
 
 function onUploaded(response: UploadResponse) {
   uploadResponse.value = response
-  statsPanel.value?.refresh()
+  loadStats()
 }
 
 function onUploadAnother() {
   uploadResponse.value = null
   uploaderKey.value += 1
 }
+
+onMounted(loadStats)
 </script>
 
 <template>
@@ -31,6 +48,7 @@ function onUploadAnother() {
     <FileUploader
       v-if="!uploadResponse"
       :key="uploaderKey"
+      :disabled="uploadsDisabled"
       @uploaded="onUploaded"
     />
 
@@ -40,7 +58,7 @@ function onUploadAnother() {
       @upload-another="onUploadAnother"
     />
 
-    <StatsPanel ref="statsPanel" />
+    <StatsPanel :state="statsState" :stats="stats" />
   </section>
 </template>
 

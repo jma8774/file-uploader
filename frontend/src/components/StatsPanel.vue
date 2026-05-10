@@ -1,26 +1,12 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
-import { getStats, type StatsResponse } from '../api'
+import type { StatsResponse } from '../api'
 import { formatBytes } from '../utils/formatBytes'
+import { SAFETY_LIMIT_MESSAGE } from '../messages'
 
-type FetchState = 'loading' | 'ready' | 'error'
-
-const state = ref<FetchState>('loading')
-const stats = ref<StatsResponse | null>(null)
-
-async function load() {
-  state.value = 'loading'
-  try {
-    stats.value = await getStats()
-    state.value = 'ready'
-  } catch {
-    state.value = 'error'
-  }
-}
-
-defineExpose({ refresh: load })
-
-onMounted(load)
+defineProps<{
+  state: 'loading' | 'ready' | 'error'
+  stats: StatsResponse | null
+}>()
 </script>
 
 <template>
@@ -37,8 +23,7 @@ onMounted(load)
         class="safety-banner"
         role="alert"
       >
-        Monthly safety limit reached. Uploads and downloads are temporarily paused
-        to protect server bandwidth.
+        {{ SAFETY_LIMIT_MESSAGE }}
       </p>
 
       <dl class="grid">

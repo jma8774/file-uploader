@@ -2,8 +2,14 @@
 import { computed, ref } from 'vue'
 import { ApiError, MAX_UPLOAD_BYTES, uploadFile, type UploadResponse } from '../api'
 import { formatBytes } from '../utils/formatBytes'
+import { SAFETY_LIMIT_MESSAGE } from '../messages'
 
 type UploadState = 'idle' | 'selected' | 'uploading' | 'success' | 'error'
+
+const props = withDefaults(
+  defineProps<{ disabled?: boolean }>(),
+  { disabled: false },
+)
 
 const emit = defineEmits<{
   select: [file: File]
@@ -18,7 +24,7 @@ const progress = ref(0)
 const isDragging = ref(false)
 const fileInput = ref<HTMLInputElement | null>(null)
 
-const canInteract = computed(() => state.value !== 'uploading')
+const canInteract = computed(() => state.value !== 'uploading' && !props.disabled)
 
 function pickFile(picked: File | null | undefined) {
   if (!picked) return
@@ -57,7 +63,7 @@ function onDragLeave() {
 }
 
 async function onUploadClick() {
-  if (state.value === 'uploading') return
+  if (state.value === 'uploading' || props.disabled) return
   if (!file.value) {
     error.value = 'Please choose a file before uploading.'
     state.value = 'error'
@@ -105,6 +111,10 @@ function reset() {
 
 <template>
   <div class="uploader">
+    <p v-if="disabled" class="safety-banner" role="alert">
+      {{ SAFETY_LIMIT_MESSAGE }}
+    </p>
+
     <label
       class="dropzone"
       :class="{
@@ -133,7 +143,14 @@ function reset() {
         {{ file.name }} — {{ formatBytes(file.size) }}
       </p>
       <div class="actions">
-        <button type="button" class="upload-btn" @click="onUploadClick">Upload</button>
+        <button
+          type="button"
+          class="upload-btn"
+          :disabled="disabled"
+          @click="onUploadClick"
+        >
+          Upload
+        </button>
         <button type="button" class="reset-btn" @click="reset">Reset</button>
       </div>
     </div>
@@ -158,6 +175,15 @@ function reset() {
   display: flex;
   flex-direction: column;
   gap: 12px;
+}
+
+.safety-banner {
+  margin: 0;
+  padding: 12px 16px;
+  border-radius: 8px;
+  background: #fffaf0;
+  border: 1px solid #f6ad55;
+  color: #7b341e;
 }
 
 .dropzone {
