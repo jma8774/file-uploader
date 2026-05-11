@@ -31,12 +31,17 @@ describe('StatsPanel', () => {
       props: { state: 'ready', stats: STATS },
     })
     const text = wrapper.text()
+    // Top-row card labels
     expect(text).toContain('Total uploads')
     expect(text).toContain('Total downloads')
     expect(text).toContain('Active files')
     expect(text).toContain('Storage used')
-    expect(text).toContain('Uploads today')
-    expect(text).toContain('Downloads today')
+    // "Uploads today" and "Downloads today" are surfaced as card subtexts
+    // (e.g., "9 today" / "44 today") under the totals. wrapper.text() squashes
+    // adjacent values, so we only assert the suffix is present at all.
+    expect(text).toContain('9 today')
+    expect(text).toContain('44 today')
+    // Monthly transfer is the full-width card below the grid
     expect(text).toContain('Monthly transfer')
     // Formatted byte values:
     expect(text).toContain('1.8 GB')

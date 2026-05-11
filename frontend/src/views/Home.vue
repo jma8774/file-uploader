@@ -3,6 +3,7 @@ import { computed, onMounted, ref } from 'vue'
 import FileUploader from '../components/FileUploader.vue'
 import UploadResult from '../components/UploadResult.vue'
 import StatsPanel from '../components/StatsPanel.vue'
+import HeroSection from '../components/HeroSection.vue'
 import { getStats, type StatsResponse, type UploadResponse } from '../api'
 
 const uploadResponse = ref<UploadResponse | null>(null)
@@ -11,7 +12,6 @@ const uploaderKey = ref(0)
 const statsState = ref<'loading' | 'ready' | 'error'>('loading')
 const stats = ref<StatsResponse | null>(null)
 
-// Treat a missing flag as enabled — only an explicit `false` should lock UI.
 const uploadsDisabled = computed(() => stats.value?.uploadsEnabled === false)
 
 async function loadStats() {
@@ -38,45 +38,46 @@ onMounted(loadStats)
 </script>
 
 <template>
-  <section class="home">
-    <header class="home-header">
-      <h1>Temporary File Drop</h1>
-      <p>Upload a file and get a temporary download link.</p>
-      <p>Files expire after 24 hours.</p>
-    </header>
+  <div class="home">
+    <HeroSection />
 
     <FileUploader
       v-if="!uploadResponse"
       :key="uploaderKey"
       :disabled="uploadsDisabled"
+      class="home-uploader"
       @uploaded="onUploaded"
     />
 
     <UploadResult
       v-else
       :response="uploadResponse"
+      class="home-uploader"
       @upload-another="onUploadAnother"
     />
 
-    <StatsPanel :state="statsState" :stats="stats" />
-  </section>
+    <StatsPanel class="home-stats" :state="statsState" :stats="stats" />
+  </div>
 </template>
 
 <style scoped>
 .home {
   display: flex;
   flex-direction: column;
-  gap: var(--space-4);
+  align-items: stretch;
 }
 
-.home-header {
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
+.home-uploader {
+  margin-top: 32px;
 }
 
-.home-header p {
-  color: var(--color-muted);
+.home-stats {
+  margin-top: 24px;
+}
+
+@media (max-width: 720px) {
+  .home-uploader {
+    margin-top: 24px;
+  }
 }
 </style>

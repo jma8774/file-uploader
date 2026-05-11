@@ -8,6 +8,9 @@
 - Plain CSS (or scoped CSS in `.vue` files). No Tailwind / no CSS-in-JS unless justified.
 - Vue Router for routes.
 - Axios for the upload progress endpoint; the rest of `api.ts` can use `fetch` or axios — pick one and stay consistent.
+- **Icons**: `lucide-vue-next`. Use existing icons before adding new SVG assets.
+- **Font**: Inter (300–800), loaded via a `<link>` to Google Fonts in `index.html`. System fallbacks if the network is unavailable.
+- **Theme**: dark only (Subtle Dark Mode Minimal). See `ai/context/theme-spec.md` and `src/assets/styles.css`. No light-mode branching — tokens are the only switch.
 
 ## File organization
 

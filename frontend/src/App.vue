@@ -1,22 +1,22 @@
 <script setup lang="ts">
+import AppHeader from './components/AppHeader.vue'
 </script>
 
 <template>
-  <main class="app">
+  <AppHeader />
+  <main class="app-main page-shell">
     <RouterView />
   </main>
 </template>
 
 <style scoped>
-.app {
-  max-width: 640px;
-  margin: 0 auto;
-  padding: var(--space-4) 20px;
+.app-main {
+  padding-block: 0 48px;
 }
 
-@media (max-width: 480px) {
-  .app {
-    padding: 20px 16px;
+@media (max-width: 720px) {
+  .app-main {
+    padding-block: 0 28px;
   }
 }
 </style>

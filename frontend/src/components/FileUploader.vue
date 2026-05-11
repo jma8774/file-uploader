@@ -1,5 +1,13 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
+import {
+  CheckCircle2,
+  CloudUpload,
+  FileText,
+  Lock,
+  TriangleAlert,
+  X,
+} from 'lucide-vue-next'
 import { ApiError, MAX_UPLOAD_BYTES, uploadFile, type UploadResponse } from '../api'
 import { formatBytes } from '../utils/formatBytes'
 import { SAFETY_LIMIT_MESSAGE } from '../messages'
@@ -62,6 +70,10 @@ function onDragLeave() {
   isDragging.value = false
 }
 
+function browseClick() {
+  fileInput.value?.click()
+}
+
 async function onUploadClick() {
   if (state.value === 'uploading' || props.disabled) return
   if (!file.value) {
@@ -90,9 +102,6 @@ async function onUploadClick() {
   }
 }
 
-// Try again returns to 'selected' with the same file kept, so the user
-// doesn't have to re-pick after a transient failure. If there's no file
-// (validation rejected before selection), drop to 'idle'.
 function tryAgain() {
   error.value = null
   progress.value = 0
@@ -111,60 +120,96 @@ function reset() {
 
 <template>
   <div class="uploader">
-    <p v-if="disabled" class="safety-banner" role="alert">
-      {{ SAFETY_LIMIT_MESSAGE }}
+    <p v-if="disabled" class="warning-panel" role="alert">
+      <TriangleAlert :size="18" :stroke-width="2.2" />
+      <span>{{ SAFETY_LIMIT_MESSAGE }}</span>
     </p>
 
-    <label
-      class="dropzone"
-      :class="{
-        'is-dragging': isDragging,
-        'has-error': state === 'error',
-        'is-disabled': !canInteract,
-      }"
-      @dragover.prevent="onDragOver"
-      @dragenter.prevent="onDragOver"
-      @dragleave.prevent="onDragLeave"
-      @drop.prevent="onDrop"
-    >
-      <input
-        ref="fileInput"
-        type="file"
-        class="dropzone-input"
-        :disabled="!canInteract"
-        @change="onFileInput"
-      />
-      <span class="dropzone-label">Drop file here or click to choose</span>
-    </label>
+    <div class="upload-card">
+      <label
+        class="dropzone"
+        :class="{
+          'is-dragging': isDragging,
+          'has-error': state === 'error',
+          'is-disabled': !canInteract,
+        }"
+        @dragover.prevent="onDragOver"
+        @dragenter.prevent="onDragOver"
+        @dragleave.prevent="onDragLeave"
+        @drop.prevent="onDrop"
+      >
+        <input
+          ref="fileInput"
+          type="file"
+          class="visually-hidden"
+          :disabled="!canInteract"
+          @change="onFileInput"
+        />
+        <span class="dropzone-icon">
+          <CloudUpload :size="26" :stroke-width="2" />
+        </span>
+        <span class="dropzone-primary">Drag &amp; drop your file here</span>
+        <span class="dropzone-secondary">
+          or
+          <button
+            type="button"
+            class="dropzone-link"
+            :disabled="!canInteract"
+            @click.prevent="browseClick"
+          >
+            click to browse
+          </button>
+        </span>
+      </label>
 
-    <div v-if="state === 'selected' && file" class="selection">
-      <p class="selection-line">
-        <strong>Selected:</strong>
-        {{ file.name }} — {{ formatBytes(file.size) }}
+      <p class="helper">
+        <Lock :size="14" :stroke-width="2.2" />
+        Max file size: 100 MB. Files expire after 24 hours.
       </p>
-      <div class="actions">
+
+      <div v-if="state === 'selected' && file" class="file-row">
+        <span class="file-icon">
+          <FileText :size="20" :stroke-width="2" />
+        </span>
+        <div class="file-meta">
+          <p class="file-name" :title="file.name">{{ file.name }}</p>
+          <p class="file-size">{{ formatBytes(file.size) }}</p>
+        </div>
+        <CheckCircle2 class="file-check" :size="20" :stroke-width="2.2" />
         <button
           type="button"
-          class="upload-btn"
-          :disabled="disabled"
-          @click="onUploadClick"
+          class="file-remove-button"
+          aria-label="Remove file"
+          @click="reset"
         >
-          Upload
+          <X :size="18" :stroke-width="2.2" />
         </button>
-        <button type="button" class="reset-btn" @click="reset">Reset</button>
       </div>
-    </div>
 
-    <div v-if="state === 'uploading'" class="progress" aria-live="polite">
-      <p class="progress-line">Upload progress: {{ progress }}%</p>
-      <progress class="progress-bar" :value="progress" max="100" />
-    </div>
+      <button
+        v-if="state === 'selected' || state === 'idle'"
+        type="button"
+        class="primary-button"
+        :disabled="disabled || state === 'idle'"
+        @click="onUploadClick"
+      >
+        <CloudUpload :size="18" :stroke-width="2.2" />
+        Upload
+      </button>
 
-    <div v-if="state === 'error'" class="error-block" role="alert">
-      <p class="error">{{ error }}</p>
-      <div class="actions">
-        <button type="button" class="upload-btn" @click="tryAgain">Try again</button>
-        <button type="button" class="reset-btn" @click="reset">Reset</button>
+      <div v-if="state === 'uploading'" class="progress" aria-live="polite">
+        <p class="progress-line">Upload progress: {{ progress }}%</p>
+        <div class="progress-track">
+          <div class="progress-bar" :style="{ width: `${progress}%` }" />
+        </div>
+      </div>
+
+      <div v-if="state === 'error'" class="error-panel" role="alert">
+        <p class="error-text">{{ error }}</p>
+        <div class="error-actions">
+          <button type="button" class="ghost-button" @click="tryAgain">Try again</button>
+          <button type="button" class="ghost-button" @click="reset">Reset</button>
+        </div>
       </div>
     </div>
   </div>
@@ -174,42 +219,66 @@ function reset() {
 .uploader {
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
+  gap: 14px;
 }
 
-.safety-banner {
-  padding: var(--space-3) 16px;
-  border-radius: var(--radius);
-  background: var(--color-warning-bg);
-  border: 1px solid var(--color-warning-border);
-  color: var(--color-warning-text);
+.warning-panel {
+  margin: 0 auto;
+  max-width: 620px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 14px 16px;
+  border-radius: 14px;
+  border: 1px solid rgba(245, 158, 11, 0.32);
+  background: var(--color-warning-soft);
+  color: #fde68a;
+  font-size: 0.95rem;
+}
+
+.upload-card {
+  margin: 0 auto;
+  max-width: 620px;
+  width: 100%;
+  padding: 18px;
+  border-radius: var(--radius-lg);
+  background: linear-gradient(180deg, rgba(22, 34, 53, 0.96), rgba(17, 28, 46, 0.96));
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-card);
+}
+
+@media (max-width: 720px) {
+  .upload-card {
+    padding: 14px;
+    border-radius: 18px;
+  }
 }
 
 .dropzone {
+  min-height: 150px;
+  border: 1.5px dashed var(--color-border-strong);
+  border-radius: var(--radius);
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: 160px;
-  padding: var(--space-4);
-  border: 2px dashed var(--color-border);
-  border-radius: var(--radius);
-  background: var(--color-surface);
+  gap: 0.4rem;
+  padding: 24px;
+  color: var(--color-text-soft);
+  background: rgba(7, 17, 31, 0.28);
   cursor: pointer;
-  text-align: center;
-  transition: border-color 120ms ease, background-color 120ms ease;
+  transition: border-color 160ms ease, background 160ms ease, transform 160ms ease;
 }
 
-.dropzone:hover {
-  border-color: var(--color-accent-strong);
-}
-
+.dropzone:hover,
 .dropzone.is-dragging {
-  border-color: var(--color-accent-strong);
-  background-color: var(--color-accent-soft);
+  border-color: rgba(59, 130, 246, 0.75);
+  background: var(--color-primary-soft);
 }
 
 .dropzone.has-error {
-  border-color: var(--color-error);
+  border-color: rgba(239, 68, 68, 0.55);
 }
 
 .dropzone.is-disabled {
@@ -217,7 +286,7 @@ function reset() {
   opacity: 0.6;
 }
 
-.dropzone-input {
+.visually-hidden {
   position: absolute;
   width: 1px;
   height: 1px;
@@ -229,69 +298,200 @@ function reset() {
   border: 0;
 }
 
-.dropzone-label {
-  color: var(--color-muted);
+.dropzone-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: var(--radius-pill);
+  display: grid;
+  place-items: center;
+  background: rgba(148, 163, 184, 0.12);
+  color: var(--color-text);
 }
 
-.selection,
-.error-block {
+.dropzone-primary {
+  font-weight: 600;
+  color: var(--color-text);
+  margin-top: 4px;
+}
+
+.dropzone-secondary {
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+}
+
+.dropzone-link {
+  color: var(--color-primary);
+  font-weight: 600;
+  cursor: pointer;
+  background: transparent;
+  border: 0;
+  padding: 0;
+  margin-left: 4px;
+}
+
+.dropzone-link:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.helper {
+  margin-top: 12px;
   display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  color: var(--color-text-muted);
+  font-size: 0.85rem;
+}
+
+.file-row {
+  margin-top: 14px;
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.85rem;
+  border-radius: 14px;
+  background: rgba(7, 17, 31, 0.36);
+  border: 1px solid var(--color-border);
+}
+
+.file-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-sm);
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+}
+
+.file-meta {
+  min-width: 0;
+  flex: 1;
+}
+
+.file-name {
+  color: var(--color-text);
+  font-weight: 650;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.file-size {
+  margin-top: 0.2rem;
+  color: var(--color-text-muted);
+  font-size: 0.875rem;
+}
+
+.file-check {
+  color: var(--color-success);
+  flex: 0 0 auto;
+}
+
+.file-remove-button {
+  color: var(--color-text-muted);
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  min-width: 36px;
+  min-height: 36px;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  transition: color 120ms ease, background-color 120ms ease;
+}
+
+.file-remove-button:hover {
+  color: var(--color-text);
+  background: rgba(148, 163, 184, 0.1);
+}
+
+.primary-button {
+  width: 100%;
+  margin-top: 14px;
+  height: 48px;
+  border: 0;
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--color-primary), #2563eb);
+  color: white;
+  font-weight: 700;
+  font-size: 1rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  cursor: pointer;
+  transition: transform 150ms ease, filter 150ms ease, opacity 150ms ease;
+}
+
+.primary-button:hover:not(:disabled) {
+  filter: brightness(1.08);
+  transform: translateY(-1px);
+}
+
+.primary-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
 }
 
 .progress {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
+  margin-top: 14px;
+}
+
+.progress-line {
+  color: var(--color-text-muted);
+  font-size: 0.875rem;
+  margin-bottom: 8px;
+}
+
+.progress-track {
+  height: 8px;
+  border-radius: var(--radius-pill);
+  background: rgba(148, 163, 184, 0.14);
+  overflow: hidden;
 }
 
 .progress-bar {
-  width: 100%;
-  height: 10px;
-  accent-color: var(--color-accent-strong);
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--color-primary), var(--color-accent));
+  transition: width 180ms ease;
 }
 
-.error {
-  color: var(--color-error);
+.error-panel {
+  margin-top: 14px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(239, 68, 68, 0.36);
+  background: var(--color-danger-soft);
+  color: #fecaca;
+  font-size: 0.9rem;
 }
 
-.actions {
+.error-text {
+  margin: 0;
+}
+
+.error-actions {
   display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
   flex-wrap: wrap;
-  gap: var(--space-2);
 }
 
-.upload-btn,
-.reset-btn {
-  min-height: var(--tap-target);
-  padding: 10px 18px;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--color-border);
-  background: var(--color-surface);
-  color: var(--color-text);
+.ghost-button {
+  padding: 0.35rem 0.85rem;
+  border-radius: 8px;
+  border: 1px solid rgba(254, 202, 202, 0.4);
+  background: transparent;
+  color: #fecaca;
   cursor: pointer;
-  transition: background-color 120ms ease, border-color 120ms ease;
+  font-size: 0.85rem;
 }
 
-.reset-btn:hover {
-  border-color: var(--color-muted);
-}
-
-.upload-btn {
-  background: var(--color-accent);
-  color: var(--color-accent-contrast);
-  border-color: var(--color-accent);
-}
-
-.upload-btn:hover {
-  background: #2d3748;
-  border-color: #2d3748;
-}
-
-.upload-btn:disabled,
-.reset-btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
+.ghost-button:hover {
+  background: rgba(239, 68, 68, 0.18);
 }
 </style>

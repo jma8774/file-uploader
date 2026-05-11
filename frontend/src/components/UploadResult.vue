@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
+import { CheckCircle2, Copy } from 'lucide-vue-next'
 import type { UploadResponse } from '../api'
 
 const props = defineProps<{ response: UploadResponse }>()
@@ -22,32 +23,40 @@ async function copyLink() {
       copied.value = false
     }, 1500)
   } catch {
-    // Clipboard API unavailable (e.g., insecure context). The link below is
-    // still selectable for manual copy.
     copied.value = false
   }
 }
 </script>
 
 <template>
-  <div class="result">
-    <p class="label">Your link:</p>
-    <a class="link" :href="response.downloadPageUrl" target="_blank" rel="noopener">
-      {{ fullUrl }}
-    </a>
-    <div class="actions">
-      <button type="button" class="primary-btn" @click="copyLink">
+  <div class="success-panel" aria-live="polite">
+    <div class="success-header">
+      <span class="success-icon">
+        <CheckCircle2 :size="22" :stroke-width="2.2" />
+      </span>
+      <div>
+        <p class="success-title">Upload successful!</p>
+        <p class="success-copy">
+          Your file is ready to share. This link will expire in 24 hours.
+        </p>
+      </div>
+    </div>
+
+    <div class="link-row">
+      <div class="link-field">
+        <span class="link-text" :title="fullUrl">{{ fullUrl }}</span>
+      </div>
+      <button type="button" class="copy-button" @click="copyLink">
+        <Copy :size="16" :stroke-width="2.2" />
         {{ copied ? 'Copied' : 'Copy Link' }}
       </button>
-      <a
-        class="open-btn"
-        :href="response.downloadPageUrl"
-        target="_blank"
-        rel="noopener"
-      >
-        Open Link
+    </div>
+
+    <div class="footer-actions">
+      <a :href="response.downloadPageUrl" target="_blank" rel="noopener" class="footer-link">
+        Open link in new tab
       </a>
-      <button type="button" class="reset-btn" @click="emit('upload-another')">
+      <button type="button" class="footer-link as-button" @click="emit('upload-another')">
         Upload another
       </button>
     </div>
@@ -55,60 +64,121 @@ async function copyLink() {
 </template>
 
 <style scoped>
-.result {
+.success-panel {
+  margin: 0 auto;
+  max-width: 620px;
+  width: 100%;
+  padding: 20px;
+  border-radius: 18px;
+  border: 1px solid rgba(20, 184, 166, 0.4);
+  background: linear-gradient(180deg, rgba(20, 184, 166, 0.12), rgba(20, 184, 166, 0.06));
+  box-shadow: var(--shadow-soft);
+}
+
+.success-header {
   display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-  padding: 16px;
+  gap: 0.9rem;
+  align-items: flex-start;
+}
+
+.success-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: var(--radius-pill);
+  background: var(--color-success-soft);
+  color: var(--color-success);
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+}
+
+.success-title {
+  font-weight: 800;
+  color: var(--color-text);
+}
+
+.success-copy {
+  margin-top: 0.2rem;
+  color: var(--color-text-soft);
+}
+
+.link-row {
+  margin-top: 14px;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+}
+
+.link-field {
+  min-width: 0;
+  height: 46px;
+  border-radius: 12px;
   border: 1px solid var(--color-border);
-  border-radius: var(--radius);
-  background: var(--color-surface);
-}
-
-.label {
-  font-weight: 600;
-}
-
-.link {
-  word-break: break-all;
-  color: var(--color-accent-strong);
-}
-
-.actions {
+  background: rgba(7, 17, 31, 0.34);
+  color: var(--color-text-soft);
+  padding: 0 14px;
   display: flex;
-  gap: var(--space-2);
+  align-items: center;
+}
+
+.link-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.copy-button {
+  height: 46px;
+  padding: 0 18px;
+  border-radius: 12px;
+  border: 0;
+  background: var(--color-accent);
+  color: white;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  transition: background-color 120ms ease;
+}
+
+.copy-button:hover {
+  background: var(--color-accent-hover);
+}
+
+.footer-actions {
+  margin-top: 12px;
+  display: flex;
+  gap: 1rem;
   flex-wrap: wrap;
 }
 
-.primary-btn,
-.open-btn,
-.reset-btn {
-  min-height: var(--tap-target);
-  padding: 10px 18px;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--color-border);
-  background: var(--color-surface);
-  color: var(--color-text);
-  cursor: pointer;
+.footer-link {
+  color: var(--color-text-muted);
+  font-size: 0.85rem;
   text-decoration: none;
-  display: inline-flex;
-  align-items: center;
-  transition: background-color 120ms ease, border-color 120ms ease;
+  cursor: pointer;
+  transition: color 120ms ease;
 }
 
-.open-btn:hover,
-.reset-btn:hover {
-  border-color: var(--color-muted);
+.footer-link:hover {
+  color: var(--color-text);
 }
 
-.primary-btn {
-  background: var(--color-accent);
-  color: var(--color-accent-contrast);
-  border-color: var(--color-accent);
+.footer-link.as-button {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  font: inherit;
 }
 
-.primary-btn:hover {
-  background: #2d3748;
-  border-color: #2d3748;
+@media (max-width: 560px) {
+  .link-row {
+    grid-template-columns: 1fr;
+  }
+  .copy-button {
+    width: 100%;
+    justify-content: center;
+  }
 }
 </style>

@@ -14,12 +14,12 @@ test.describe('download page', () => {
   test('expired sentinel token shows the expired state', async ({ page }) => {
     await page.goto('/file/expired-test')
     await expect(page.getByRole('heading', { name: 'File expired' })).toBeVisible()
-    await expect(page.getByRole('link', { name: 'Upload another file' })).toBeVisible()
+    await expect(page.getByRole('link', { name: 'Upload another file' }).first()).toBeVisible()
   })
 
   test('error sentinel token shows the generic error state', async ({ page }) => {
     await page.goto('/file/error-test')
     await expect(page.getByRole('heading', { name: 'Something went wrong' })).toBeVisible()
-    await expect(page.getByRole('link', { name: 'Upload another file' })).toBeVisible()
+    await expect(page.getByRole('link', { name: 'Upload another file' }).first()).toBeVisible()
   })
 })

@@ -20,16 +20,19 @@ describe('UploadResult', () => {
     expect(wrapper.text()).toContain(expectedUrl)
   })
 
-  it('renders Copy Link, Open Link, and Upload another buttons', () => {
+  it('renders Copy Link, Open link, and Upload another actions', () => {
     const wrapper = mount(UploadResult, { props: { response: RESPONSE } })
     expect(wrapper.text()).toContain('Copy Link')
-    expect(wrapper.text()).toContain('Open Link')
+    expect(wrapper.text()).toContain('Open link in new tab')
     expect(wrapper.text()).toContain('Upload another')
   })
 
-  it('emits "upload-another" when the reset button is clicked', async () => {
+  it('emits "upload-another" when the Upload another button is clicked', async () => {
     const wrapper = mount(UploadResult, { props: { response: RESPONSE } })
-    await wrapper.find('.reset-btn').trigger('click')
+    const buttons = wrapper.findAll('button')
+    const uploadAnother = buttons.find((b) => b.text() === 'Upload another')
+    expect(uploadAnother).toBeDefined()
+    await uploadAnother!.trigger('click')
     expect(wrapper.emitted('upload-another')).toHaveLength(1)
   })
 })

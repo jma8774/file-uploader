@@ -11,8 +11,7 @@ test.describe('upload flow', () => {
       buffer: Buffer.from('hello world'),
     })
 
-    // Selection state is reached.
-    await expect(page.getByText('Selected:')).toBeVisible()
+    // Selection state: filename appears in the file row.
     await expect(page.getByText('sample.txt')).toBeVisible()
 
     await page.getByRole('button', { name: 'Upload' }).click()
@@ -20,10 +19,10 @@ test.describe('upload flow', () => {
     // Progress state appears.
     await expect(page.getByText(/Upload progress: \d+%/)).toBeVisible({ timeout: 5_000 })
 
-    // Result state: link section is visible.
-    await expect(page.getByText('Your link:')).toBeVisible({ timeout: 15_000 })
+    // Success state: result panel is visible.
+    await expect(page.getByText('Upload successful!')).toBeVisible({ timeout: 15_000 })
     await expect(page.getByRole('button', { name: /Copy Link|Copied/ })).toBeVisible()
-    await expect(page.getByRole('link', { name: 'Open Link' })).toBeVisible()
+    await expect(page.getByRole('link', { name: /Open link in new tab/ })).toBeVisible()
     await expect(page.getByRole('button', { name: 'Upload another' })).toBeVisible()
   })
 })
