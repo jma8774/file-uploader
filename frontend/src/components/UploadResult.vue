@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { CheckCircle2, Copy } from 'lucide-vue-next'
+import { CheckCircle2, Copy, ExternalLink, RotateCcw } from 'lucide-vue-next'
 import type { UploadResponse } from '../api'
 
 const props = defineProps<{ response: UploadResponse }>()
@@ -53,10 +53,17 @@ async function copyLink() {
     </div>
 
     <div class="footer-actions">
-      <a :href="response.downloadPageUrl" target="_blank" rel="noopener" class="footer-link">
+      <a
+        :href="response.downloadPageUrl"
+        target="_blank"
+        rel="noopener"
+        class="footer-link"
+      >
+        <ExternalLink :size="14" :stroke-width="2.2" />
         Open link in new tab
       </a>
       <button type="button" class="footer-link as-button" @click="emit('upload-another')">
+        <RotateCcw :size="14" :stroke-width="2.2" />
         Upload another
       </button>
     </div>
@@ -147,17 +154,26 @@ async function copyLink() {
 }
 
 .footer-actions {
-  margin-top: 12px;
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(148, 163, 184, 0.12);
   display: flex;
+  align-items: center;
+  justify-content: space-between;
   gap: 1rem;
   flex-wrap: wrap;
 }
 
 .footer-link {
-  color: var(--color-text-muted);
-  font-size: 0.85rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--color-text-soft);
+  font-size: 0.875rem;
+  font-weight: 500;
   text-decoration: none;
   cursor: pointer;
+  line-height: 1;
   transition: color 120ms ease;
 }
 
@@ -169,7 +185,10 @@ async function copyLink() {
   background: transparent;
   border: 0;
   padding: 0;
-  font: inherit;
+  /* Use font-family: inherit (not the `font: inherit` shorthand) so the
+     button keeps the .footer-link size / weight / line-height instead of
+     being reset to the body's values. */
+  font-family: inherit;
 }
 
 @media (max-width: 560px) {
