@@ -19,11 +19,17 @@ const STATS: StatsResponse = {
 }
 
 describe('StatsPanel', () => {
-  it('shows loading state when state is loading', () => {
+  it('renders the card layout with em-dash placeholders while loading', () => {
     const wrapper = mount(StatsPanel, {
       props: { state: 'loading', stats: null },
     })
-    expect(wrapper.text()).toContain('Loading stats')
+    const text = wrapper.text()
+    // Labels stay so the layout shape is stable across loading -> ready.
+    expect(text).toContain('Total uploads')
+    expect(text).toContain('Storage used')
+    expect(text).toContain('Monthly transfer')
+    // Values are em-dashes until stats arrive.
+    expect(text).toContain('—')
   })
 
   it('renders all the spec stat labels with formatted values', () => {
@@ -49,11 +55,14 @@ describe('StatsPanel', () => {
     expect(text).toContain('250 GB')
   })
 
-  it('falls back to "Stats unavailable" on error', () => {
+  it('renders the same placeholder layout on error', () => {
     const wrapper = mount(StatsPanel, {
       props: { state: 'error', stats: null },
     })
-    expect(wrapper.text()).toContain('Stats unavailable')
+    const text = wrapper.text()
+    expect(text).not.toContain('Stats unavailable')
+    expect(text).toContain('Total uploads')
+    expect(text).toContain('—')
   })
 
   it('shows the safety-cap banner when uploadsEnabled is false', () => {

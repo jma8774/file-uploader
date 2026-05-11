@@ -12,112 +12,121 @@ import type { StatsResponse } from '../api'
 import { formatBytes } from '../utils/formatBytes'
 import { SAFETY_LIMIT_MESSAGE } from '../messages'
 
+const DASH = '—'
+
 const props = defineProps<{
   state: 'loading' | 'ready' | 'error'
   stats: StatsResponse | null
 }>()
 
+const hasStats = computed(() => props.state === 'ready' && props.stats !== null)
+
+function num(value: number): string {
+  return hasStats.value ? value.toLocaleString() : DASH
+}
+
+function bytes(value: number): string {
+  return hasStats.value ? formatBytes(value) : DASH
+}
+
 const storagePct = computed(() => {
-  if (!props.stats || props.stats.storageLimitBytes <= 0) return 0
+  if (!hasStats.value || !props.stats || props.stats.storageLimitBytes <= 0) return 0
   return Math.min(100, (props.stats.storageUsedBytes / props.stats.storageLimitBytes) * 100)
 })
 
 const monthlyPct = computed(() => {
-  if (!props.stats || props.stats.monthlyTransferSafetyLimitBytes <= 0) return 0
+  if (!hasStats.value || !props.stats || props.stats.monthlyTransferSafetyLimitBytes <= 0) return 0
   return Math.min(
     100,
     (props.stats.estimatedMonthlyTransferBytes / props.stats.monthlyTransferSafetyLimitBytes) * 100,
   )
 })
+
+const safetyCapReached = computed(
+  () =>
+    hasStats.value &&
+    props.stats !== null &&
+    (props.stats.uploadsEnabled === false || props.stats.downloadsEnabled === false),
+)
 </script>
 
 <template>
   <section class="stats-section">
-    <p v-if="state === 'loading'" class="status-line">Loading stats…</p>
+    <p v-if="safetyCapReached" class="warning-panel" role="alert">
+      <TriangleAlert :size="18" :stroke-width="2.2" />
+      <span>{{ SAFETY_LIMIT_MESSAGE }}</span>
+    </p>
 
-    <p v-else-if="state === 'error'" class="status-line">Stats unavailable</p>
-
-    <template v-else-if="stats">
-      <p
-        v-if="stats.uploadsEnabled === false || stats.downloadsEnabled === false"
-        class="warning-panel"
-        role="alert"
-      >
-        <TriangleAlert :size="18" :stroke-width="2.2" />
-        <span>{{ SAFETY_LIMIT_MESSAGE }}</span>
-      </p>
-
-      <div class="stats-grid">
-        <div class="stat-card">
-          <div class="stat-icon uploads">
-            <Upload :size="20" :stroke-width="2" />
-          </div>
-          <div>
-            <p class="stat-label">Total uploads</p>
-            <p class="stat-value">{{ stats.totalUploads.toLocaleString() }}</p>
-            <p class="stat-subtext">{{ stats.uploadsToday }} today</p>
-          </div>
+    <div class="stats-grid" :class="{ 'is-placeholder': !hasStats }">
+      <div class="stat-card">
+        <div class="stat-icon uploads">
+          <Upload :size="20" :stroke-width="2" />
         </div>
-
-        <div class="stat-card">
-          <div class="stat-icon downloads">
-            <Download :size="20" :stroke-width="2" />
-          </div>
-          <div>
-            <p class="stat-label">Total downloads</p>
-            <p class="stat-value">{{ stats.totalDownloads.toLocaleString() }}</p>
-            <p class="stat-subtext">{{ stats.downloadsToday }} today</p>
-          </div>
-        </div>
-
-        <div class="stat-card">
-          <div class="stat-icon active">
-            <Clock3 :size="20" :stroke-width="2" />
-          </div>
-          <div>
-            <p class="stat-label">Active files</p>
-            <p class="stat-value">{{ stats.activeFiles }}</p>
-            <p class="stat-subtext">in last 24 hours</p>
-          </div>
-        </div>
-
-        <div class="stat-card">
-          <div class="stat-icon storage">
-            <Database :size="20" :stroke-width="2" />
-          </div>
-          <div class="storage-meta">
-            <p class="stat-label">Storage used</p>
-            <p class="stat-value">{{ formatBytes(stats.storageUsedBytes) }}</p>
-            <p class="stat-subtext">of {{ formatBytes(stats.storageLimitBytes) }} used</p>
-            <div class="storage-progress-track">
-              <div class="storage-progress-bar" :style="{ width: `${storagePct}%` }" />
-            </div>
-          </div>
+        <div>
+          <p class="stat-label">Total uploads</p>
+          <p class="stat-value">{{ num(stats?.totalUploads ?? 0) }}</p>
+          <p v-if="hasStats" class="stat-subtext">{{ stats?.uploadsToday }} today</p>
         </div>
       </div>
 
-      <div class="transfer-card">
-        <div class="transfer-header">
-          <div class="stat-icon transfer">
-            <Activity :size="20" :stroke-width="2" />
-          </div>
-          <div class="transfer-meta">
-            <p class="stat-label">Monthly transfer</p>
-            <p class="transfer-line">
-              <span class="transfer-value">
-                {{ formatBytes(stats.estimatedMonthlyTransferBytes) }}
-              </span>
-              <span class="transfer-cap">
-                / {{ formatBytes(stats.monthlyTransferSafetyLimitBytes) }} safety cap
-              </span>
-            </p>
-          </div>
+      <div class="stat-card">
+        <div class="stat-icon downloads">
+          <Download :size="20" :stroke-width="2" />
         </div>
-        <div class="storage-progress-track">
-          <div class="storage-progress-bar" :style="{ width: `${monthlyPct}%` }" />
+        <div>
+          <p class="stat-label">Total downloads</p>
+          <p class="stat-value">{{ num(stats?.totalDownloads ?? 0) }}</p>
+          <p v-if="hasStats" class="stat-subtext">{{ stats?.downloadsToday }} today</p>
         </div>
       </div>
-    </template>
+
+      <div class="stat-card">
+        <div class="stat-icon active">
+          <Clock3 :size="20" :stroke-width="2" />
+        </div>
+        <div>
+          <p class="stat-label">Active files</p>
+          <p class="stat-value">{{ num(stats?.activeFiles ?? 0) }}</p>
+          <p v-if="hasStats" class="stat-subtext">in last 24 hours</p>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon storage">
+          <Database :size="20" :stroke-width="2" />
+        </div>
+        <div class="storage-meta">
+          <p class="stat-label">Storage used</p>
+          <p class="stat-value">{{ bytes(stats?.storageUsedBytes ?? 0) }}</p>
+          <p v-if="hasStats" class="stat-subtext">
+            of {{ bytes(stats?.storageLimitBytes ?? 0) }} used
+          </p>
+          <div v-if="hasStats" class="storage-progress-track">
+            <div class="storage-progress-bar" :style="{ width: `${storagePct}%` }" />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="transfer-card" :class="{ 'is-placeholder': !hasStats }">
+      <div class="transfer-header">
+        <div class="stat-icon transfer">
+          <Activity :size="20" :stroke-width="2" />
+        </div>
+        <div class="transfer-meta">
+          <p class="stat-label">Monthly transfer</p>
+          <p class="transfer-line">
+            <span class="transfer-value">{{ bytes(stats?.estimatedMonthlyTransferBytes ?? 0) }}</span>
+            <span v-if="hasStats" class="transfer-cap">
+              / {{ bytes(stats?.monthlyTransferSafetyLimitBytes ?? 0) }} safety cap
+            </span>
+          </p>
+        </div>
+      </div>
+      <div v-if="hasStats" class="storage-progress-track">
+        <div class="storage-progress-bar" :style="{ width: `${monthlyPct}%` }" />
+      </div>
+    </div>
   </section>
 </template>
 
@@ -126,12 +135,6 @@ const monthlyPct = computed(() => {
   display: flex;
   flex-direction: column;
   gap: 14px;
-}
-
-.status-line {
-  margin: 0;
-  text-align: center;
-  color: var(--color-text-muted);
 }
 
 .warning-panel {
@@ -150,6 +153,12 @@ const monthlyPct = computed(() => {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 14px;
+  transition: opacity 200ms ease;
+}
+
+.stats-grid.is-placeholder,
+.transfer-card.is-placeholder {
+  opacity: 0.55;
 }
 
 .stat-card {
