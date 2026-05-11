@@ -48,6 +48,9 @@ playwright-report/
 test-results/
 playwright/.cache/
 
+# Local-only deploy notes (lives in docs/ for a stable path, not tracked)
+docs/filedrop-deploy.html
+
 # Misc
 *.tsbuildinfo
 .cache/
