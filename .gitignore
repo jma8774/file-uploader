@@ -48,8 +48,12 @@ playwright-report/
 test-results/
 playwright/.cache/
 
-# Local-only deploy notes (lives in docs/ for a stable path, not tracked)
-docs/filedrop-deploy.html
+# Local-only docs (deploy walkthrough, droplet runbook, etc.) — the entire
+# docs/ directory is gitignored on purpose because the files in it carry
+# operator details (real IP, hostname, history of mistakes) that don't
+# belong in a public repo. Add docs with `git add -f` if you ever want to
+# track a sanitized one.
+docs/
 
 # Misc
 *.tsbuildinfo
