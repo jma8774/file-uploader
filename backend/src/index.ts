@@ -2,10 +2,12 @@ import express from 'express'
 import { config } from './config.js'
 import './db.js' // open + migrate + seed on import
 import { healthRouter } from './routes/health.js'
+import { uploadRouter } from './routes/upload.js'
 
 const app = express()
 app.use(express.json())
 app.use('/api', healthRouter)
+app.use('/api', uploadRouter)
 
 app.listen(config.port, () => {
   console.log(
