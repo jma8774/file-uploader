@@ -4,12 +4,14 @@ import './db.js' // open + migrate + seed on import
 import { healthRouter } from './routes/health.js'
 import { uploadRouter } from './routes/upload.js'
 import { fileInfoRouter } from './routes/fileInfo.js'
+import { downloadRouter } from './routes/download.js'
 
 const app = express()
 app.use(express.json())
 app.use('/api', healthRouter)
 app.use('/api', uploadRouter)
 app.use('/api', fileInfoRouter)
+app.use('/d', downloadRouter)
 
 app.listen(config.port, () => {
   console.log(
