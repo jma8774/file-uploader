@@ -44,6 +44,18 @@ chown -R www-data:www-data "$PUBLIC_DIR"
 echo "==> restarting $SERVICE"
 systemctl restart "$SERVICE"
 
-echo "==> health check"
-curl -fsS http://127.0.0.1:3000/api/health >/dev/null
-echo "Deploy complete."
+echo "==> health check (waiting up to 30s for the listener)"
+# systemctl restart returns once the process is spawned, NOT once Node
+# has bound to :3000. Poll until /api/health responds or we give up.
+for attempt in $(seq 1 60); do
+  if curl -fsS http://127.0.0.1:3000/api/health >/dev/null 2>&1; then
+    echo "Deploy complete."
+    exit 0
+  fi
+  sleep 0.5
+done
+
+echo "deploy.sh: $SERVICE did not respond on :3000 within 30s." >&2
+echo "Recent logs:" >&2
+journalctl -u "$SERVICE" --no-pager -n 40 >&2
+exit 1
