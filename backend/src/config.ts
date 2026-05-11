@@ -68,3 +68,8 @@ export function ensureDirs(): void {
   mkdirSync(uploadDir, { recursive: true })
   mkdirSync(dirname(databasePath), { recursive: true })
 }
+
+// Run on import so the SQLite open in db.ts and the file writes in routes/
+// always see the directories. ESM hoists imports above non-import statements,
+// so dropping this here is the simplest correct place for it.
+ensureDirs()

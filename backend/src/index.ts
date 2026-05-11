@@ -1,8 +1,7 @@
 import express from 'express'
-import { config, ensureDirs } from './config.js'
+import { config } from './config.js'
+import './db.js' // open + migrate + seed on import
 import { healthRouter } from './routes/health.js'
-
-ensureDirs()
 
 const app = express()
 app.use(express.json())
