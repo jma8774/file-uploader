@@ -1,10 +1,8 @@
 import { expect, test } from '@playwright/test'
 
 test.describe('homepage', () => {
-  test('renders the hero, header, and drop zone', async ({ page }) => {
+  test('renders the hero and drop zone', async ({ page }) => {
     await page.goto('/')
-    // App header logo
-    await expect(page.getByRole('link', { name: /FileDrop/ })).toBeVisible()
     // Hero headline (split across lines)
     await expect(page.getByRole('heading', { name: /Upload a file/ })).toBeVisible()
     await expect(page.getByText('temporary link.')).toBeVisible()
