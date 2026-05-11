@@ -37,13 +37,21 @@ describe('FileUploader', () => {
     expect(wrapper.find('button.primary-button').exists()).toBe(true)
   })
 
-  it('shows the safety-cap banner and disables Upload when disabled prop is true', async () => {
+  it('shows the default paused banner and disables Upload when disabled prop is true', async () => {
     const wrapper = mount(FileUploader, { props: { disabled: true } })
-    expect(wrapper.text()).toContain('Monthly safety limit reached')
+    // Default disabled-message is the generic "Uploads are temporarily paused."
+    expect(wrapper.text()).toContain('Uploads are temporarily paused')
     await pickFile(wrapper, makeFile(1024, 'small.txt'))
     const uploadBtn = wrapper.find('button.primary-button')
     if (uploadBtn.exists()) {
       expect((uploadBtn.element as HTMLButtonElement).disabled).toBe(true)
     }
+  })
+
+  it('renders a custom disabledMessage when provided', () => {
+    const wrapper = mount(FileUploader, {
+      props: { disabled: true, disabledMessage: 'Monthly safety limit reached.' },
+    })
+    expect(wrapper.text()).toContain('Monthly safety limit reached')
   })
 })

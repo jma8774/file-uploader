@@ -10,7 +10,7 @@ import {
 } from '../api'
 import { formatBytes } from '../utils/formatBytes'
 import { formatTimeRemaining } from '../utils/formatTime'
-import { SAFETY_LIMIT_MESSAGE } from '../messages'
+import { pausedMessage } from '../messages'
 
 const props = defineProps<{ token: string }>()
 
@@ -21,6 +21,9 @@ const info = ref<FileInfoActive | null>(null)
 const stats = ref<StatsResponse | null>(null)
 
 const downloadsDisabled = computed(() => stats.value?.downloadsEnabled === false)
+const disabledBannerMessage = computed(
+  () => (stats.value && pausedMessage(stats.value)) || null,
+)
 
 async function load() {
   state.value = 'loading'
@@ -64,9 +67,9 @@ onMounted(load)
     <p v-if="state === 'loading'" class="loading">Loading…</p>
 
     <template v-else>
-      <p v-if="downloadsDisabled" class="warning-panel" role="alert">
+      <p v-if="disabledBannerMessage" class="warning-panel" role="alert">
         <TriangleAlert :size="18" :stroke-width="2.2" />
-        <span>{{ SAFETY_LIMIT_MESSAGE }}</span>
+        <span>{{ disabledBannerMessage }}</span>
       </p>
 
       <article v-if="state === 'active' && info" class="card">

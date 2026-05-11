@@ -10,7 +10,7 @@ import {
 } from 'lucide-vue-next'
 import type { StatsResponse } from '../api'
 import { formatBytes } from '../utils/formatBytes'
-import { SAFETY_LIMIT_MESSAGE } from '../messages'
+import { pausedMessage } from '../messages'
 
 const DASH = '—'
 
@@ -42,19 +42,17 @@ const monthlyPct = computed(() => {
   )
 })
 
-const safetyCapReached = computed(
-  () =>
-    hasStats.value &&
-    props.stats !== null &&
-    (props.stats.uploadsEnabled === false || props.stats.downloadsEnabled === false),
-)
+const bannerMessage = computed(() => {
+  if (!hasStats.value || !props.stats) return null
+  return pausedMessage(props.stats)
+})
 </script>
 
 <template>
   <section class="stats-section">
-    <p v-if="safetyCapReached" class="warning-panel" role="alert">
+    <p v-if="bannerMessage" class="warning-panel" role="alert">
       <TriangleAlert :size="18" :stroke-width="2.2" />
-      <span>{{ SAFETY_LIMIT_MESSAGE }}</span>
+      <span>{{ bannerMessage }}</span>
     </p>
 
     <div class="stats-grid" :class="{ 'is-placeholder': !hasStats }">

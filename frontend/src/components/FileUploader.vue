@@ -10,13 +10,13 @@ import {
 } from 'lucide-vue-next'
 import { ApiError, MAX_UPLOAD_BYTES, uploadFile, type UploadResponse } from '../api'
 import { formatBytes } from '../utils/formatBytes'
-import { SAFETY_LIMIT_MESSAGE } from '../messages'
+import { UPLOADS_PAUSED_MESSAGE } from '../messages'
 
 type UploadState = 'idle' | 'selected' | 'uploading' | 'success' | 'error'
 
 const props = withDefaults(
-  defineProps<{ disabled?: boolean }>(),
-  { disabled: false },
+  defineProps<{ disabled?: boolean; disabledMessage?: string }>(),
+  { disabled: false, disabledMessage: UPLOADS_PAUSED_MESSAGE },
 )
 
 const emit = defineEmits<{
@@ -122,7 +122,7 @@ function reset() {
   <div class="uploader">
     <p v-if="disabled" class="warning-panel" role="alert">
       <TriangleAlert :size="18" :stroke-width="2.2" />
-      <span>{{ SAFETY_LIMIT_MESSAGE }}</span>
+      <span>{{ disabledMessage }}</span>
     </p>
 
     <div class="upload-card">

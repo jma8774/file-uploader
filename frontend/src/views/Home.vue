@@ -5,6 +5,7 @@ import UploadResult from '../components/UploadResult.vue'
 import StatsPanel from '../components/StatsPanel.vue'
 import HeroSection from '../components/HeroSection.vue'
 import { getStats, type StatsResponse, type UploadResponse } from '../api'
+import { pausedMessage, UPLOADS_PAUSED_MESSAGE } from '../messages'
 
 const uploadResponse = ref<UploadResponse | null>(null)
 const uploaderKey = ref(0)
@@ -13,6 +14,12 @@ const statsState = ref<'loading' | 'ready' | 'error'>('loading')
 const stats = ref<StatsResponse | null>(null)
 
 const uploadsDisabled = computed(() => stats.value?.uploadsEnabled === false)
+
+// Match the message shown by StatsPanel so the page doesn't display two
+// different reasons in two places.
+const uploaderDisabledMessage = computed(
+  () => (stats.value && pausedMessage(stats.value)) || UPLOADS_PAUSED_MESSAGE,
+)
 
 async function loadStats() {
   statsState.value = 'loading'
@@ -45,6 +52,7 @@ onMounted(loadStats)
       v-if="!uploadResponse"
       :key="uploaderKey"
       :disabled="uploadsDisabled"
+      :disabled-message="uploaderDisabledMessage"
       class="home-uploader"
       @uploaded="onUploaded"
     />

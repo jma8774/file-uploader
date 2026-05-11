@@ -65,9 +65,26 @@ describe('StatsPanel', () => {
     expect(text).toContain('—')
   })
 
-  it('shows the safety-cap banner when uploadsEnabled is false', () => {
+  it('shows a generic paused banner when uploadsEnabled is false and the cap is not reached', () => {
     const wrapper = mount(StatsPanel, {
       props: { state: 'ready', stats: { ...STATS, uploadsEnabled: false } },
+    })
+    const text = wrapper.text()
+    expect(text).toContain('Uploads are temporarily paused')
+    expect(text).not.toContain('Monthly safety limit reached')
+  })
+
+  it('shows the safety-cap banner when transfer is at the cap', () => {
+    const wrapper = mount(StatsPanel, {
+      props: {
+        state: 'ready',
+        stats: {
+          ...STATS,
+          uploadsEnabled: false,
+          downloadsEnabled: false,
+          estimatedMonthlyTransferBytes: STATS.monthlyTransferSafetyLimitBytes,
+        },
+      },
     })
     expect(wrapper.text()).toContain('Monthly safety limit reached')
   })
