@@ -14,17 +14,51 @@ const fullUrl = computed(() => `${window.location.origin}${props.response.downlo
 const copied = ref(false)
 let copiedTimer: number | undefined
 
-async function copyLink() {
+function legacyCopy(text: string): boolean {
+  // Fallback for non-secure contexts (e.g., plain http://<ip>) where
+  // navigator.clipboard is undefined. document.execCommand('copy') is
+  // deprecated but every browser still honors it as a fallback.
+  const textarea = document.createElement('textarea')
+  textarea.value = text
+  textarea.setAttribute('readonly', '')
+  textarea.style.position = 'fixed'
+  textarea.style.top = '0'
+  textarea.style.left = '0'
+  textarea.style.opacity = '0'
+  textarea.style.pointerEvents = 'none'
+  document.body.appendChild(textarea)
+  textarea.focus()
+  textarea.select()
+  let ok = false
   try {
-    await navigator.clipboard.writeText(fullUrl.value)
-    copied.value = true
-    window.clearTimeout(copiedTimer)
-    copiedTimer = window.setTimeout(() => {
-      copied.value = false
-    }, 1500)
+    ok = document.execCommand('copy')
   } catch {
-    copied.value = false
+    ok = false
   }
+  document.body.removeChild(textarea)
+  return ok
+}
+
+async function copyLink() {
+  let ok = false
+  if (window.isSecureContext && navigator.clipboard?.writeText) {
+    try {
+      await navigator.clipboard.writeText(fullUrl.value)
+      ok = true
+    } catch {
+      ok = false
+    }
+  }
+  if (!ok) {
+    ok = legacyCopy(fullUrl.value)
+  }
+  if (!ok) return
+
+  copied.value = true
+  window.clearTimeout(copiedTimer)
+  copiedTimer = window.setTimeout(() => {
+    copied.value = false
+  }, 1500)
 }
 </script>
 
