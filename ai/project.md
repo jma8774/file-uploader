@@ -32,6 +32,8 @@ User accounts, admin dashboard, multi-file upload, permanent hosting, public fil
 
 ## Current project status
 
-Greenfield. **Currently in a frontend-first phase**: the Vue/Vite frontend is being built first, and the backend is emulated through a mock API client (`src/api.ts`). Button clicks and network calls are noops or return canned data so the UI can be developed and styled end-to-end before the Node/Express/SQLite backend exists.
+Frontend is complete and styled (TICKETs 001–013). **Active scope is the backend MVP** — TICKETs 014–023 cover the Node/Express/SQLite server, cleanup job, rate limits, frontend↔backend wiring, and a backend test suite. The frontend still talks to the emulated `src/api.ts` (ADR-0002) until TICKET-022 swaps it for real HTTP.
 
-The full spec lives at `ai/context/spec.md` (mirrored from the original `filedrop_project_spec.md`).
+Local dev runs on macOS; production target is a single Linux DigitalOcean Droplet — paths to the uploads dir and SQLite file come from environment variables so the same source runs on both.
+
+The full spec lives at `ai/context/spec.md` (mirrored from the original `filedrop_project_spec.md`); the dark-theme spec lives at `ai/context/theme-spec.md`.
