@@ -44,7 +44,3 @@ cd frontend && npm test && npm run test:e2e
 
 # Backend tests land in TICKET-023.
 ```
-
-## Public repository — no secrets
-
-This repo is public on GitHub. Never commit `.env`, real API keys, production hostnames, IP addresses, or personal data. Reference secrets by env-var name only.
