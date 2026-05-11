@@ -29,6 +29,7 @@ const monthlyTransferSafetyLimitBytes = readInt(
   'MONTHLY_TRANSFER_SAFETY_LIMIT_BYTES',
   250 * 1024 * 1024 * 1024,
 )
+const cleanupIntervalMs = readInt('CLEANUP_INTERVAL_MS', 10 * 60 * 1000)
 
 const ipHashSecretRaw = process.env.IP_HASH_SECRET
 let ipHashSecret: string
@@ -59,6 +60,7 @@ export const config = Object.freeze({
   storageLimitBytes,
   perFileTransferLimitBytes,
   monthlyTransferSafetyLimitBytes,
+  cleanupIntervalMs,
   ipHashSecret,
 })
 

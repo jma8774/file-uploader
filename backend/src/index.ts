@@ -6,6 +6,7 @@ import { uploadRouter } from './routes/upload.js'
 import { fileInfoRouter } from './routes/fileInfo.js'
 import { downloadRouter } from './routes/download.js'
 import { statsRouter } from './routes/stats.js'
+import { startCleanupLoop } from './services/cleanupService.js'
 
 const app = express()
 app.use(express.json())
@@ -21,4 +22,5 @@ app.listen(config.port, () => {
   )
   console.log(`  upload dir:    ${config.uploadDir}`)
   console.log(`  database path: ${config.databasePath}`)
+  startCleanupLoop()
 })
