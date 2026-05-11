@@ -34,6 +34,7 @@ Thumbs.db
 
 # Local data (would only exist on the production Droplet, but guard anyway)
 /var/
+backend/var/
 uploads/
 *.db
 *.sqlite
