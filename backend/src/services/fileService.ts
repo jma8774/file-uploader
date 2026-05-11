@@ -58,6 +58,18 @@ export function insertFile(input: InsertFileInput): void {
   })
 }
 
+const selectByTokenStmt = db.prepare<[string], FileRow>(
+  'SELECT * FROM files WHERE token = ?',
+)
+
+export function getFileByToken(token: string): FileRow | undefined {
+  return selectByTokenStmt.get(token)
+}
+
+export function isActive(row: FileRow, nowIso: string): boolean {
+  return row.is_deleted === 0 && row.expires_at > nowIso
+}
+
 export function computeMaxDownloads(sizeBytes: number): number {
   if (sizeBytes <= 0) return 1
   return Math.max(1, Math.floor(config.perFileTransferLimitBytes / sizeBytes))
