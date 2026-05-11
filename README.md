@@ -39,8 +39,9 @@ ai/         Project context for AI coding agents (CLAUDE.md points at this).
 ## Tests
 
 ```bash
-# Unit + e2e for the frontend
+# Frontend unit + e2e
 cd frontend && npm test && npm run test:e2e
 
-# Backend tests land in TICKET-023.
+# Backend unit + integration
+cd backend && npm test
 ```

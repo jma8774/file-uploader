@@ -21,10 +21,8 @@
 
 ## Adding or changing tests
 
-No test framework is wired up yet. When adding one:
-- Use Vitest for unit, Vue Test Utils for components, Playwright (optional) for e2e.
-- Co-locate `*.test.ts` next to the unit under test, or use `__tests__/` if it gets crowded.
-- File a small ADR explaining the choice.
+- **Frontend**: Vitest + Vue Test Utils for unit, Playwright (Chromium) for e2e. `cd frontend && npm test`, `npm run test:e2e`. Co-locate `*.test.ts` next to the unit; e2e specs live in `frontend/e2e/`.
+- **Backend**: Vitest + supertest. `cd backend && npm test`. Unit tests sit next to the file under test (`src/services/*.test.ts`); HTTP integration tests live in `backend/test/integration/` and use `createTestApp()` from `backend/test/helpers/` for a fresh DB + uploads dir per test.
 
 ## Updating the API client
 

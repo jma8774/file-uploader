@@ -1,23 +1,8 @@
-import express from 'express'
 import { config } from './config.js'
-import './db.js' // open + migrate + seed on import
-import { healthRouter } from './routes/health.js'
-import { uploadRouter } from './routes/upload.js'
-import { fileInfoRouter } from './routes/fileInfo.js'
-import { downloadRouter } from './routes/download.js'
-import { statsRouter } from './routes/stats.js'
+import { createApp } from './app.js'
 import { startCleanupLoop } from './services/cleanupService.js'
 
-const app = express()
-// Trust the first reverse proxy hop (Nginx in production) so req.ip is the
-// real client IP for rate limiting + IP hashing.
-app.set('trust proxy', 1)
-app.use(express.json())
-app.use('/api', healthRouter)
-app.use('/api', uploadRouter)
-app.use('/api', fileInfoRouter)
-app.use('/api', statsRouter)
-app.use('/d', downloadRouter)
+const app = createApp()
 
 app.listen(config.port, () => {
   console.log(
