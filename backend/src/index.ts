@@ -9,6 +9,9 @@ import { statsRouter } from './routes/stats.js'
 import { startCleanupLoop } from './services/cleanupService.js'
 
 const app = express()
+// Trust the first reverse proxy hop (Nginx in production) so req.ip is the
+// real client IP for rate limiting + IP hashing.
+app.set('trust proxy', 1)
 app.use(express.json())
 app.use('/api', healthRouter)
 app.use('/api', uploadRouter)

@@ -4,12 +4,19 @@ import { config } from '../config.js'
 import { getFileByToken, isActive } from '../services/fileService.js'
 import { recordDownload } from '../services/downloadService.js'
 import { hashIp } from '../services/ipHash.js'
+import { enforceDownloadEnabled } from '../middleware/safetyCap.js'
+import { downloadLimiter, perFileDownloadLimiter } from '../middleware/rateLimit.js'
 
 export const downloadRouter = Router()
 
 const RESOLVED_UPLOAD_DIR = resolve(config.uploadDir)
 
-downloadRouter.get('/:token', (req: Request, res: Response) => {
+downloadRouter.get(
+  '/:token',
+  enforceDownloadEnabled,
+  perFileDownloadLimiter,
+  downloadLimiter,
+  (req: Request, res: Response) => {
   const token = req.params.token
   const row = token ? getFileByToken(token) : undefined
   const now = new Date().toISOString()
@@ -65,4 +72,5 @@ downloadRouter.get('/:token', (req: Request, res: Response) => {
   res.download(absolutePath, row.original_name, (err) => {
     if (err) console.error('[download] res.download error', err)
   })
-})
+  },
+)

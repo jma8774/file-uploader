@@ -14,6 +14,8 @@ import {
   createToken,
   currentMonthBucket,
 } from '../services/tokenService.js'
+import { enforceUploadEnabled } from '../middleware/safetyCap.js'
+import { uploadLimiter } from '../middleware/rateLimit.js'
 
 export const uploadRouter = Router()
 
@@ -40,6 +42,8 @@ const upload = multer({
 
 uploadRouter.post(
   '/upload',
+  enforceUploadEnabled,
+  uploadLimiter,
   (req: Request, res: Response, next: NextFunction) => {
     upload.single('file')(req, res, (err: unknown) => {
       if (!err) return next()

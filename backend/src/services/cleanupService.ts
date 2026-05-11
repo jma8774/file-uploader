@@ -2,6 +2,8 @@ import { unlink } from 'node:fs/promises'
 import { join, resolve } from 'node:path'
 import { db } from '../db.js'
 import { config } from '../config.js'
+import { getSetting, setSetting } from './settingsService.js'
+import { clearFlagCache } from '../middleware/safetyCap.js'
 
 const RESOLVED_UPLOAD_DIR = resolve(config.uploadDir)
 
@@ -29,6 +31,17 @@ const markDeletedStmt = db.prepare(
 const sumActiveBytesStmt = db.prepare<[], { total: number }>(
   `SELECT COALESCE(SUM(size_bytes), 0) AS total FROM files WHERE is_deleted = 0`,
 )
+
+const sumMonthlyTransferStmt = db.prepare<[string], { total: number }>(
+  `SELECT COALESCE(SUM(bytes), 0) AS total FROM bandwidth_events
+   WHERE created_at >= ?`,
+)
+
+function startOfMonthUtc(now: Date): string {
+  const year = now.getUTCFullYear()
+  const month = String(now.getUTCMonth() + 1).padStart(2, '0')
+  return `${year}-${month}-01T00:00:00.000Z`
+}
 
 async function deleteFromDisk(storedName: string): Promise<void> {
   const absolutePath = resolve(join(config.uploadDir, storedName))
@@ -64,6 +77,27 @@ export interface CleanupSummary {
   evicted: number
   usageBytes: number
   limitBytes: number
+  capTripped: boolean
+}
+
+function maybeTripSafetyCap(): boolean {
+  const monthStart = startOfMonthUtc(new Date())
+  const transferred = sumMonthlyTransferStmt.get(monthStart)?.total ?? 0
+  if (transferred < config.monthlyTransferSafetyLimitBytes) return false
+  // Already tripped: don't re-log on every pass.
+  if (
+    getSetting('uploads_enabled') === 'false' &&
+    getSetting('downloads_enabled') === 'false'
+  ) {
+    return false
+  }
+  setSetting('uploads_enabled', 'false')
+  setSetting('downloads_enabled', 'false')
+  clearFlagCache()
+  console.warn(
+    `[cleanup] monthly transfer ${transferred} >= cap ${config.monthlyTransferSafetyLimitBytes} — uploads + downloads auto-disabled`,
+  )
+  return true
 }
 
 export async function runCleanup(): Promise<CleanupSummary> {
@@ -89,11 +123,13 @@ export async function runCleanup(): Promise<CleanupSummary> {
   }
 
   const usageBytes = sumActiveBytesStmt.get()?.total ?? 0
+  const capTripped = maybeTripSafetyCap()
   return {
     expired,
     evicted,
     usageBytes,
     limitBytes: config.storageLimitBytes,
+    capTripped,
   }
 }
 
