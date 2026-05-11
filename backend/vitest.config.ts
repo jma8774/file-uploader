@@ -10,5 +10,7 @@ export default defineConfig({
     fileParallelism: false,
     sequence: { concurrent: false },
     setupFiles: ['./test/setup.ts'],
+    include: ['src/**/*.test.ts', 'test/**/*.test.ts'],
+    exclude: ['dist/**', 'node_modules/**'],
   },
 })
