@@ -77,7 +77,7 @@ onMounted(load)
         <p class="filename" :title="info.originalName">{{ info.originalName }}</p>
         <p class="meta">{{ formatBytes(info.sizeBytes) }}</p>
         <p class="meta">{{ formatTimeRemaining(info.expiresAt) }}</p>
-        <!-- EMULATED: /d/:token is served by the (deferred) backend. -->
+        <!-- The anchor navigates to /d/:token; the backend streams the bytes. -->
         <a
           v-if="!downloadsDisabled"
           class="primary-button"

@@ -2,7 +2,12 @@
 
 ## Status
 
-Accepted
+Superseded by TICKET-022 (2026-05-10). The frontend now talks to the real
+Node/Express backend (`/api/*` and `/d/*`); the emulation in `src/api.ts`
+has been replaced with axios + fetch calls. This ADR stays in place for
+historical context — the frontend-first phase made the UI buildable
+before the backend existed, and the contract-matched emulation made the
+swap a single-file change.
 
 ## Context
 

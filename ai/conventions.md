@@ -33,13 +33,6 @@
 - Function signatures and return types must match the spec'd backend contracts (§9 of the spec). The emulated implementation produces matching shapes, so swapping in the real backend is a one-file change.
 - Errors thrown by the API client must include `{ error, message }` so callers can render the right user-visible string.
 
-## Emulation rules (frontend-first phase)
-
-- Network actions (upload, fetch file info, fetch stats) return canned data via `setTimeout` / async generators.
-- Upload progress is simulated by emitting fake `onUploadProgress` events at intervals.
-- Copy-to-clipboard and "open link" buttons can be real (use the Clipboard API) — they don't need a backend.
-- Mark emulated branches with a `// EMULATED:` comment so they're easy to find and replace.
-
 ## State management
 
 - Local component state via `ref`/`reactive`. No Pinia/Vuex unless a third component needs to share state.

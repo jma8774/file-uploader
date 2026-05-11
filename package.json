@@ -1,0 +1,11 @@
+{
+  "name": "filedrop",
+  "private": true,
+  "description": "Repo-root meta scripts only. App deps live in frontend/ and backend/.",
+  "scripts": {
+    "dev": "concurrently --kill-others --prefix-colors=blue,green --names=frontend,backend \"npm run dev --prefix frontend\" \"npm run dev --prefix backend\""
+  },
+  "devDependencies": {
+    "concurrently": "^9.0.1"
+  }
+}

@@ -9,7 +9,7 @@ Browser → Nginx → Vue/Vite static frontend
                 ↘ /api/* and /d/* → Node/Express backend → SQLite + local upload dir
 ```
 
-**Current phase**: only the `frontend/` exists. All `/api/*` and `/d/*` calls are emulated through `src/api.ts` so the UI can be developed in isolation. The backend will be added in a later phase.
+**Current phase**: both `frontend/` and `backend/` exist. The MVP backend (`/api/health`, `/api/upload`, `/api/file/:token`, `/api/stats`, `/d/:token`) is wired up. In dev, Vite proxies `/api/*` and `/d/*` to the Node process on port 3000. ADR-0002 (frontend-first emulation) is now superseded.
 
 ## Repository layout (planned)
 
@@ -32,17 +32,19 @@ ai/            Project context for AI coding agents
 - `src/views/Download.vue` — `/file/:token` page with active/expired/not-found states.
 - `src/utils/formatBytes.ts`, `src/utils/formatTime.ts` — display helpers.
 
-## Data flow (frontend, emulated)
+## Data flow
 
 ```text
-FileUploader → api.uploadFile(file, onProgress)
-              ↳ emulated: yields fake progress events, returns { token, downloadPageUrl, ... }
-              ↘ UploadResult shows link
+FileUploader → axios.post('/api/upload', formData, {onUploadProgress})
+              ↳ backend writes file to disk + inserts files row, returns UploadResponse
+              ↘ UploadResult renders link
 
-Download view → api.getFileInfo(token)
-              ↳ emulated: returns canned active/expired/not-found response
-StatsPanel    → api.getStats()
-              ↳ emulated: returns canned numbers
+Download view → fetch('/api/file/:token')
+              ↳ backend returns active metadata or { status: 'expired' }
+StatsPanel    → fetch('/api/stats')
+              ↳ backend aggregates from files + download_events + bandwidth_events
+Download anchor → /d/:token (browser navigation)
+              ↳ backend streams bytes with the original filename
 ```
 
 ## Authentication and authorization

@@ -9,29 +9,33 @@ on:
 jobs:
   frontend:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: frontend
     steps:
       - uses: actions/checkout@v4
 
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: npm
-          cache-dependency-path: frontend/package-lock.json
 
-      - name: Install dependencies
+      - name: Install backend deps (needed by the e2e Playwright webServer)
+        working-directory: backend
+        run: npm ci
+
+      - name: Install frontend deps
+        working-directory: frontend
         run: npm ci
 
       - name: Type-check + build
+        working-directory: frontend
         run: npm run build
 
       - name: Unit tests
+        working-directory: frontend
         run: npm test
 
       - name: Install Playwright browsers
+        working-directory: frontend
         run: npx playwright install --with-deps chromium
 
       - name: E2E tests
+        working-directory: frontend
         run: npm run test:e2e

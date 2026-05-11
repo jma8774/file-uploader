@@ -32,7 +32,7 @@ User accounts, admin dashboard, multi-file upload, permanent hosting, public fil
 
 ## Current project status
 
-Frontend is complete and styled (TICKETs 001–013). **Active scope is the backend MVP** — TICKETs 014–023 cover the Node/Express/SQLite server, cleanup job, rate limits, frontend↔backend wiring, and a backend test suite. The frontend still talks to the emulated `src/api.ts` (ADR-0002) until TICKET-022 swaps it for real HTTP.
+Frontend (TICKETs 001–013) and backend MVP (TICKETs 014–019) are done, plus TICKET-022 which wired the frontend to the real backend (ADR-0002 superseded). **Active scope** is the hardening pass — TICKET-020 (cleanup job), TICKET-021 (rate limits + safety-cap kill switch), TICKET-023 (backend tests).
 
 Local dev runs on macOS; production target is a single Linux DigitalOcean Droplet — paths to the uploads dir and SQLite file come from environment variables so the same source runs on both.
 

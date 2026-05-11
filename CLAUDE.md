@@ -20,4 +20,4 @@ The source code is the source of truth. The `ai/` directory provides orientation
 
 ## Current phase
 
-Frontend-first. Backend calls are emulated through `frontend/src/api.ts`. See `ai/decisions/ADR-0002-frontend-first-emulated-backend.md`.
+Frontend talks to a real backend over `/api/*` and `/d/*`. The MVP server (TICKETs 014–019) is built; hardening tickets (020 cleanup, 021 rate limits, 023 tests) remain. Run both with `npm run dev` from the repo root.

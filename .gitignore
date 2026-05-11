@@ -32,9 +32,10 @@ Thumbs.db
 *.swp
 *.swo
 
-# Local data (would only exist on the production Droplet, but guard anyway)
+# Local data + Playwright temp DB (would only exist on the production Droplet, but guard anyway)
 /var/
 backend/var/
+frontend/var/
 uploads/
 *.db
 *.sqlite
